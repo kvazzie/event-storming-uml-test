@@ -53,13 +53,14 @@ cd plantuml && ./render.sh   # or: cd d2 && ./render.sh
 
 ## CI
 
-Per-folder PNG/SVG are git-ignored build outputs. `.generated/` is the
-one committed mirror: `.github/workflows/render.yml` rebuilds both
-boards on push/PR touching either variant, commits the results back to
-`.generated/` (push only, so PRs from forks still validate), and also
-uploads them as the `event-storming-boards` artifact (30 days). The
-images above resolve straight from `.generated/`. A red build means a
-board source broke — same failure as `./render.sh`.
+Per-folder PNG/SVG and `.generated/` are git-ignored build outputs.
+`.generated/` is the published mirror: `.github/workflows/render.yml`
+rebuilds both boards on push/PR touching either variant, force-adds
+the results (`git add -f`, the only writer) and commits them back on
+push — so the images above always reflect the latest board sources. PRs from
+forks still validate via the `event-storming-boards` artifact upload
+(30 days). A red build means a board source broke — same failure as
+`./render.sh`.
 
 Suggested next: push to a remote for backup/sharing, then replace
 checkout with your own domain (keep the ID scheme and

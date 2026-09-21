@@ -1,7 +1,5 @@
-# Rendered diagram artifacts — regenerated locally via ./render.sh
-# or in CI, never committed... except the published mirror below.
+# Rendered diagram artifacts — ignored by default (build locally via
+# ./render.sh). CI publishes the .generated/ mirror with `git add -f`.
 *.png
 *.svg
-!.generated/
-!.generated/*.png
-!.generated/*.svg
+.generated/
