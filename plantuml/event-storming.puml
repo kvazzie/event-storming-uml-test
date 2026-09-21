@@ -1,0 +1,155 @@
+@startuml event-storming
+' ============================================================
+' Event-Storming prototype in PlantUML
+' Conventions for agent-assisted sessions (Claude Code etc.):
+'  - Every sticky has a stable ID: <prefix><NN>_<Name>
+'    E = Event (orange), C = Command (blue), A = Aggregate (yellow)
+'    P = Policy (lilac), R = ReadModel (green), X = External (grey)
+'    H = Hotspot (pink), U = Actor/User (white)
+'  - Time flows top -> bottom by phase (1,2,3,4), left -> right inside a phase.
+'  - Arrows show causality, not sequence.
+'  - Edit this file only; regenerate PNG/SVG with ./render.sh
+' ============================================================
+!pragma layout smetana
+left to right direction
+skinparam linetype ortho
+skinparam shadowing true
+skinparam roundCorner 10
+skinparam defaultFontSize 14
+skinparam wrapWidth 200
+
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #333333
+  FontStyle bold
+}
+skinparam rectangle<<event>> {
+  BackgroundColor #FF9F1C
+  BorderColor #B36B00
+}
+skinparam rectangle<<command>> {
+  BackgroundColor #6AAFFF
+  BorderColor #2B5FAB
+  FontColor white
+}
+skinparam rectangle<<aggregate>> {
+  BackgroundColor #FFE66D
+  BorderColor #B39B00
+}
+skinparam rectangle<<policy>> {
+  BackgroundColor #C3B2FF
+  BorderColor #6A5ACD
+}
+skinparam rectangle<<readmodel>> {
+  BackgroundColor #95D5B2
+  BorderColor #2D7D4F
+}
+skinparam rectangle<<external>> {
+  BackgroundColor #DEE2E6
+  BorderColor #6C757D
+}
+skinparam rectangle<<hotspot>> {
+  BackgroundColor #FF8FA3
+  BorderColor #C9184A
+}
+skinparam rectangle<<actor>> {
+  BackgroundColor white
+  BorderColor #333333
+}
+
+title **Big-Picture Event Storming (prototype): Online Order Checkout**\nphases left-to-right, flow left-to-right inside each phase — v0.3 (added CancelOrder demo)
+
+' ---------- Actor (left of everything) ----------
+rectangle "U01\nShopper" as U01_Shopper <<actor>>
+
+' ---------- Phase 1: Browse & Cart ----------
+package "1. Browse & Cart" {
+  rectangle "C01\nAddItemToCart" as C01_AddItemToCart <<command>>
+  rectangle "A01\nCart" as A01_Cart <<aggregate>>
+  rectangle "E01\nItemAddedToCart" as E01_ItemAddedToCart <<event>>
+  rectangle "R01\nCartView" as R01_CartView <<readmodel>>
+  rectangle "H01\n?: merge guest +\nlogged-in carts?" as H01_MergeCarts <<hotspot>>
+}
+
+' ---------- Phase 2: Checkout ----------
+package "2. Checkout" {
+  rectangle "C02\nPlaceOrder" as C02_PlaceOrder <<command>>
+  rectangle "A02\nOrder" as A02_Order <<aggregate>>
+  rectangle "E02\nOrderPlaced" as E02_OrderPlaced <<event>>
+  rectangle "C05\nCancelOrder" as C05_CancelOrder <<command>>
+  rectangle "E06\nOrderCancelled" as E06_OrderCancelled <<event>>
+  rectangle "R02\nOrderSummary" as R02_OrderSummary <<readmodel>>
+  rectangle "H02\n!: double-click\nPlaceOrder?" as H02_DoubleClick <<hotspot>>
+}
+
+' ---------- Phase 3: Payment ----------
+package "3. Payment" {
+  rectangle "P01\nWhenever OrderPlaced\nthen AuthorizePayment" as P01_AuthPayment <<policy>>
+  rectangle "C03\nAuthorizePayment" as C03_AuthPayment <<command>>
+  rectangle "X01\nStripe PSP" as X01_Stripe <<external>>
+  rectangle "E03\nPaymentAuthorized" as E03_PaymentAuthorized <<event>>
+  rectangle "E04\nPaymentFailed" as E04_PaymentFailed <<event>>
+  rectangle "P02\nWhenever PaymentFailed\nthen NotifyShopper" as P02_Notify <<policy>>
+  rectangle "H03\n?: retry limit +\nmanual review?" as H03_RetryPolicy <<hotspot>>
+}
+
+' ---------- Phase 4: Fulfillment ----------
+package "4. Fulfillment" {
+  rectangle "P03\nWhenever PaymentAuthorized\nthen StartFulfillment" as P03_Fulfill <<policy>>
+  rectangle "C04\nShipOrder" as C04_ShipOrder <<command>>
+  rectangle "A03\nShipment" as A03_Shipment <<aggregate>>
+  rectangle "X02\nWarehouse" as X02_Warehouse <<external>>
+  rectangle "E05\nOrderShipped" as E05_OrderShipped <<event>>
+  rectangle "R03\nTrackingView" as R03_Tracking <<readmodel>>
+}
+
+' ---------- Causality ----------
+U01_Shopper --> C01_AddItemToCart : triggers
+C01_AddItemToCart --> A01_Cart : on
+A01_Cart --> E01_ItemAddedToCart : emits
+E01_ItemAddedToCart ..> R01_CartView : projects
+E01_ItemAddedToCart ..> H01_MergeCarts
+
+U01_Shopper --> C02_PlaceOrder : triggers
+C02_PlaceOrder --> A02_Order : on
+A02_Order --> E02_OrderPlaced : emits
+E02_OrderPlaced ..> R02_OrderSummary : projects
+E02_OrderPlaced ..> H02_DoubleClick
+U01_Shopper --> C05_CancelOrder : triggers
+C05_CancelOrder --> A02_Order : on
+A02_Order --> E06_OrderCancelled : emits
+E06_OrderCancelled ..> R02_OrderSummary : projects
+
+E02_OrderPlaced --> P01_AuthPayment : triggers
+P01_AuthPayment --> C03_AuthPayment : invokes
+C03_AuthPayment --> X01_Stripe : calls
+X01_Stripe --> E03_PaymentAuthorized : ok
+X01_Stripe --> E04_PaymentFailed : ko
+E04_PaymentFailed --> P02_Notify : triggers
+P02_Notify ..> H03_RetryPolicy
+
+E03_PaymentAuthorized --> P03_Fulfill : triggers
+P03_Fulfill --> C04_ShipOrder : invokes
+C04_ShipOrder --> A03_Shipment : on
+C04_ShipOrder --> X02_Warehouse : requests
+A03_Shipment --> E05_OrderShipped : emits
+E05_OrderShipped ..> R03_Tracking : projects
+
+' ---------- Layout hints: force phases top-to-bottom in order ----------
+C01_AddItemToCart -[hidden]down-> C02_PlaceOrder
+H02_DoubleClick -[hidden]down-> P01_AuthPayment
+H03_RetryPolicy -[hidden]down-> P03_Fulfill
+
+legend right
+  |= Color |= Meaning |
+  | <#FF9F1C> orange | Domain Event (past tense) |
+  | <#6AAFFF> blue | Command (imperative) |
+  | <#FFE66D> yellow | Aggregate (consistency boundary) |
+  | <#C3B2FF> lilac | Policy (whenever... then...) |
+  | <#95D5B2> green | Read model / projection |
+  | <#DEE2E6> grey | External system |
+  | <#FF8FA3> pink | Hotspot / question / risk |
+endlegend
+
+footer Generated from event-storming.puml — edit source, run ./render.sh, review diff
+@enduml

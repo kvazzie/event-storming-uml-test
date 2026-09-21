@@ -1,0 +1,437 @@
+# ============================================================
+# Event-Storming prototype in D2 — Online Order Checkout
+# Same content/IDs as ../plantuml/event-storming.puml, but placed by
+# Event-Storming convention on a D2 grid (NOT a copy of the .puml layout):
+#
+#   columns = time, left -> right (one per phase)
+#   rows    = convention bands, top -> bottom:
+#     Trigger — actor, command, read model (who decides, with what info)
+#     React   — policy ("whenever X then Y", between event and command)
+#     Record  — domain events (the timeline spine)
+#     Enforce — aggregate + external system (what executes the decision)
+#   Hotspots stick to the cell of whatever they question.
+#
+# Grid facts that matter when editing:
+#  - `board` is ONE grid (5 cols x 5 rows); children fill ROW by row
+#    (grid-rows is declared first = row-major). Never reorder children.
+#  - Row 0 = phase headers, col 0 = band labels, corner = ghost.
+#  - Body cells carry `label: ""` so no key leaks into the render.
+#  - Empty bands (p1/p2 have no policies) hold a `ghost` placeholder —
+#    the grid needs all 25 cells filled to keep alignment.
+#  - Node keys are <cell>.<STABLE_ID>, e.g. p2_trigger.C02_PlaceOrder.
+#    The part after the dot is the stable ID — never rename it.
+#  - Layout engine is TALA (render.sh sets it): it routes edges between
+#    grid cells and allows per-container `direction` (used by legend);
+#    dagre/ELK draw straight center-center segments inside grids.
+#  - Edit this file only; regenerate with ./render.sh
+# ============================================================
+
+direction: right
+
+classes: {
+  event: {
+    style: {
+      fill: "#FF9F1C"
+      stroke: "#B36B00"
+      border-radius: 8
+      shadow: true
+      bold: true
+    }
+  }
+  command: {
+    style: {
+      fill: "#6AAFFF"
+      stroke: "#2B5FAB"
+      font-color: "#FFFFFF"
+      border-radius: 8
+      shadow: true
+      bold: true
+    }
+  }
+  aggregate: {
+    style: {
+      fill: "#FFE66D"
+      stroke: "#B39B00"
+      border-radius: 8
+      shadow: true
+      bold: true
+    }
+  }
+  policy: {
+    style: {
+      fill: "#C3B2FF"
+      stroke: "#6A5ACD"
+      border-radius: 8
+      shadow: true
+      bold: true
+    }
+  }
+  readmodel: {
+    style: {
+      fill: "#95D5B2"
+      stroke: "#2D7D4F"
+      border-radius: 8
+      shadow: true
+      bold: true
+    }
+  }
+  external: {
+    style: {
+      fill: "#DEE2E6"
+      stroke: "#6C757D"
+      border-radius: 8
+      shadow: true
+      bold: true
+    }
+  }
+  hotspot: {
+    style: {
+      fill: "#FF8FA3"
+      stroke: "#C9184A"
+      border-radius: 8
+      shadow: true
+      bold: true
+    }
+  }
+  actor: {
+    style: {
+      fill: "#FFFFFF"
+      stroke: "#333333"
+      bold: true
+    }
+  }
+  ghost: {
+    style: {
+      opacity: 0
+    }
+  }
+}
+
+board: {
+  label: ""
+  grid-rows: 5
+  grid-columns: 5
+  grid-gap: 16
+
+  # ---------- Row 0: corner + phase headers ----------
+  corner: {
+    class: ghost
+  }
+  hdr_p1: {
+    label: "1. Browse & Cart"
+    shape: text
+    style: {
+      bold: true
+      font-size: 20
+    }
+  }
+  hdr_p2: {
+    label: "2. Checkout"
+    shape: text
+    style: {
+      bold: true
+      font-size: 20
+    }
+  }
+  hdr_p3: {
+    label: "3. Payment"
+    shape: text
+    style: {
+      bold: true
+      font-size: 20
+    }
+  }
+  hdr_p4: {
+    label: "4. Fulfillment"
+    shape: text
+    style: {
+      bold: true
+      font-size: 20
+    }
+  }
+
+  # ---------- Row 1: Trigger band ----------
+  rail_trigger: {
+    label: "Trigger\nactor · command · view"
+    shape: text
+    style: {
+      bold: true
+      font-size: 16
+    }
+  }
+  p1_trigger: {
+    label: ""
+    U01_Shopper: {
+      label: "U01\nShopper"
+      class: actor
+      shape: person
+    }
+    C01_AddItemToCart: {
+      label: "C01\nAddItemToCart"
+      class: command
+    }
+    R01_CartView: {
+      label: "R01\nCartView"
+      class: readmodel
+    }
+  }
+  p2_trigger: {
+    label: ""
+    C02_PlaceOrder: {
+      label: "C02\nPlaceOrder"
+      class: command
+    }
+    C05_CancelOrder: {
+      label: "C05\nCancelOrder"
+      class: command
+    }
+    R02_OrderSummary: {
+      label: "R02\nOrderSummary"
+      class: readmodel
+    }
+    H02_DoubleClick: {
+      label: "H02\n!: double-click\nPlaceOrder?"
+      class: hotspot
+    }
+  }
+  p3_trigger: {
+    label: ""
+    C03_AuthPayment: {
+      label: "C03\nAuthorizePayment"
+      class: command
+    }
+  }
+  p4_trigger: {
+    label: ""
+    C04_ShipOrder: {
+      label: "C04\nShipOrder"
+      class: command
+    }
+    R03_Tracking: {
+      label: "R03\nTrackingView"
+      class: readmodel
+    }
+  }
+
+  # ---------- Row 2: React band ----------
+  rail_react: {
+    label: "React\npolicy"
+    shape: text
+    style: {
+      bold: true
+      font-size: 16
+    }
+  }
+  p1_react: {
+    class: ghost
+  }
+  p2_react: {
+    class: ghost
+  }
+  p3_react: {
+    label: ""
+    P01_AuthPayment: {
+      label: "P01\nWhenever OrderPlaced\nthen AuthorizePayment"
+      class: policy
+    }
+    P02_Notify: {
+      label: "P02\nWhenever PaymentFailed\nthen NotifyShopper"
+      class: policy
+    }
+    H03_RetryPolicy: {
+      label: "H03\n?: retry limit +\nmanual review?"
+      class: hotspot
+    }
+  }
+  p4_react: {
+    label: ""
+    P03_Fulfill: {
+      label: "P03\nWhenever PaymentAuthorized\nthen StartFulfillment"
+      class: policy
+    }
+  }
+
+  # ---------- Row 3: Record band (the event spine) ----------
+  rail_record: {
+    label: "Record\nevent"
+    shape: text
+    style: {
+      bold: true
+      font-size: 16
+    }
+  }
+  p1_events: {
+    label: ""
+    E01_ItemAddedToCart: {
+      label: "E01\nItemAddedToCart"
+      class: event
+    }
+    H01_MergeCarts: {
+      label: "H01\n?: merge guest +\nlogged-in carts?"
+      class: hotspot
+    }
+  }
+  p2_events: {
+    label: ""
+    E02_OrderPlaced: {
+      label: "E02\nOrderPlaced"
+      class: event
+    }
+    E06_OrderCancelled: {
+      label: "E06\nOrderCancelled"
+      class: event
+    }
+  }
+  p3_events: {
+    label: ""
+    E03_PaymentAuthorized: {
+      label: "E03\nPaymentAuthorized"
+      class: event
+    }
+    E04_PaymentFailed: {
+      label: "E04\nPaymentFailed"
+      class: event
+    }
+  }
+  p4_events: {
+    label: ""
+    E05_OrderShipped: {
+      label: "E05\nOrderShipped"
+      class: event
+    }
+  }
+
+  # ---------- Row 4: Enforce band (below the events) ----------
+  rail_enforce: {
+    label: "Enforce\naggregate · system"
+    shape: text
+    style: {
+      bold: true
+      font-size: 16
+    }
+  }
+  p1_enforce: {
+    label: ""
+    A01_Cart: {
+      label: "A01\nCart"
+      class: aggregate
+    }
+  }
+  p2_enforce: {
+    label: ""
+    A02_Order: {
+      label: "A02\nOrder"
+      class: aggregate
+    }
+  }
+  p3_enforce: {
+    label: ""
+    X01_Stripe: {
+      label: "X01\nStripe PSP"
+      class: external
+    }
+  }
+  p4_enforce: {
+    label: ""
+    A03_Shipment: {
+      label: "A03\nShipment"
+      class: aggregate
+    }
+    X02_Warehouse: {
+      label: "X02\nWarehouse"
+      class: external
+    }
+  }
+}
+
+# ---------- Causality (same as the PlantUML sibling) ----------
+board.p1_trigger.U01_Shopper -> board.p1_trigger.C01_AddItemToCart: triggers
+board.p1_trigger.C01_AddItemToCart -> board.p1_enforce.A01_Cart: on
+board.p1_enforce.A01_Cart -> board.p1_events.E01_ItemAddedToCart: emits
+board.p1_events.E01_ItemAddedToCart -> board.p1_trigger.R01_CartView: {
+  label: projects
+  style: {
+    stroke-dash: 4
+  }
+}
+board.p1_events.E01_ItemAddedToCart -> board.p1_events.H01_MergeCarts
+
+board.p1_trigger.U01_Shopper -> board.p2_trigger.C02_PlaceOrder: triggers
+board.p2_trigger.C02_PlaceOrder -> board.p2_enforce.A02_Order: on
+board.p2_enforce.A02_Order -> board.p2_events.E02_OrderPlaced: emits
+board.p2_events.E02_OrderPlaced -> board.p2_trigger.R02_OrderSummary: {
+  label: projects
+  style: {
+    stroke-dash: 4
+  }
+}
+board.p2_events.E02_OrderPlaced -> board.p2_trigger.H02_DoubleClick
+board.p1_trigger.U01_Shopper -> board.p2_trigger.C05_CancelOrder: triggers
+board.p2_trigger.C05_CancelOrder -> board.p2_enforce.A02_Order: on
+board.p2_enforce.A02_Order -> board.p2_events.E06_OrderCancelled: emits
+board.p2_events.E06_OrderCancelled -> board.p2_trigger.R02_OrderSummary: {
+  label: projects
+  style: {
+    stroke-dash: 4
+  }
+}
+
+board.p2_events.E02_OrderPlaced -> board.p3_react.P01_AuthPayment: triggers
+board.p3_react.P01_AuthPayment -> board.p3_trigger.C03_AuthPayment: invokes
+board.p3_trigger.C03_AuthPayment -> board.p3_enforce.X01_Stripe: calls
+board.p3_enforce.X01_Stripe -> board.p3_events.E03_PaymentAuthorized: ok
+board.p3_enforce.X01_Stripe -> board.p3_events.E04_PaymentFailed: ko
+board.p3_events.E04_PaymentFailed -> board.p3_react.P02_Notify: triggers
+board.p3_react.P02_Notify -> board.p3_react.H03_RetryPolicy: {
+  style: {
+    stroke-dash: 4
+  }
+}
+
+board.p3_events.E03_PaymentAuthorized -> board.p4_react.P03_Fulfill: triggers
+board.p4_react.P03_Fulfill -> board.p4_trigger.C04_ShipOrder: invokes
+board.p4_trigger.C04_ShipOrder -> board.p4_enforce.A03_Shipment: on
+board.p4_trigger.C04_ShipOrder -> board.p4_enforce.X02_Warehouse: requests
+board.p4_enforce.A03_Shipment -> board.p4_events.E05_OrderShipped: emits
+board.p4_events.E05_OrderShipped -> board.p4_trigger.R03_Tracking: {
+  label: projects
+  style: {
+    stroke-dash: 4
+  }
+}
+
+# ---------- Legend (vertical stack of chips; `direction: down` is honored
+# by TALA here — nested per-container `direction: right` is not, so no
+# swatch+text grid: each chip carries its class color directly) ----------
+legend: {
+  label: Legend
+  direction: down
+  lg_event: {
+    label: "Event — past tense"
+    class: event
+  }
+  lg_command: {
+    label: "Command — imperative"
+    class: command
+  }
+  lg_aggregate: {
+    label: "Aggregate — consistency boundary"
+    class: aggregate
+  }
+  lg_policy: {
+    label: "Policy — whenever… then…"
+    class: policy
+  }
+  lg_readmodel: {
+    label: "Read model / projection"
+    class: readmodel
+  }
+  lg_external: {
+    label: "External system"
+    class: external
+  }
+  lg_hotspot: {
+    label: "Hotspot / question / risk"
+    class: hotspot
+  }
+}
