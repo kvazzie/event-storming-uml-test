@@ -79,6 +79,9 @@ jobs:
           name: event-storming-boards
           path: .generated/
           retention-days: 30
+          # .generated/ starts with a dot, which upload-artifact
+          # treats as hidden and would otherwise skip entirely.
+          include-hidden-files: true
 
       - name: Commit generated boards
         if: github.event_name == 'push'
