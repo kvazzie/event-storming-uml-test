@@ -1,0 +1,4 @@
+# Published board renders — binary media: no text diffs, no merges,
+# always checkout with native line endings untouched.
+.generated/*.png binary
+.generated/*.svg binary
