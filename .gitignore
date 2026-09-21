@@ -1,4 +1,7 @@
 # Rendered diagram artifacts — regenerated locally via ./render.sh
-# or in CI (.github/workflows/render.yml), never committed.
+# or in CI, never committed... except the published mirror below.
 *.png
 *.svg
+!.generated/
+!.generated/*.png
+!.generated/*.svg

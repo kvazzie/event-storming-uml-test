@@ -14,7 +14,8 @@ We just demoed the loop: prompt "add cancel path" → edited `.puml`
 
 - `event-storming.puml` — the board (example domain: Online Order Checkout, v0.3)
 - `event-storming.png` / `.svg` — rendered output (git-ignored;
-  build with `./render.sh` or download from CI), do not hand-edit
+  build with `./render.sh`, see published copy in `../.generated/`
+  or download from CI), do not hand-edit
 - `render.sh` — renders both formats (uses Smetana, no Graphviz needed)
 - `CLAUDE.md` — operating instructions for the agent
 
