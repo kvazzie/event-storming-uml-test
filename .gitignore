@@ -1,0 +1,4 @@
+# Rendered diagram artifacts — regenerated locally via ./render.sh
+# or in CI (.github/workflows/render.yml), never committed.
+*.png
+*.svg

@@ -41,6 +41,14 @@ cd plantuml && ./render.sh   # or: cd d2 && ./render.sh
 # 2. "Apply the H02 one: add policy P04, re-render."
 # 3. Review: git diff <file> + the PNG. Keep / revert / adjust.
 
-Suggested next: `git init; git add .; git commit` so every session is a
-reviewable diff, then replace checkout with your own domain (keep the
-ID scheme and one-concept-per-edit rule).
+## CI
+
+Rendered PNG/SVG are git-ignored. `.github/workflows/render.yml`
+rebuilds both boards on push/PR touching either variant and uploads
+them as the `event-storming-boards` artifact (30 days). To review a
+board without building: open the Actions run, download the artifact.
+A red build means a board source broke — same failure as `./render.sh`.
+
+Suggested next: push to a remote for backup/sharing, then replace
+checkout with your own domain (keep the ID scheme and
+one-concept-per-edit rule).

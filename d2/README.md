@@ -6,8 +6,9 @@ D2 sibling of `../plantuml/` — same board, same stickies, same stable IDs
 ## Files
 
 - `event-storming.d2` — the board, source of truth
-- `event-storming.svg` / `.png` — rendered output, do not hand-edit
-- `render.sh` — renders both (layout ELK, override with `D2_LAYOUT=dagre`)
+- `event-storming.svg` / `.png` — rendered output (git-ignored;
+  build with `./render.sh` or download from CI), do not hand-edit
+- `render.sh` — renders both (layout TALA, override with `D2_LAYOUT=dagre`)
 - `CLAUDE.md` — operating instructions for the agent
 
 ## Prerequisites
