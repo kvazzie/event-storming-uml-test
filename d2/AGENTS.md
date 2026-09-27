@@ -1,4 +1,4 @@
-# CLAUDE.md — Event-Storming Board Operator (D2)
+# AGENTS.md — Event-Storming Board Operator (D2)
 
 Source of truth: `event-storming.d2`. Never hand-edit SVG/PNG.
 

@@ -17,7 +17,7 @@ We just demoed the loop: prompt "add cancel path" → edited `.puml`
   build with `./render.sh`, see published copy in `../.generated/`
   or download from CI), do not hand-edit
 - `render.sh` — renders both formats (uses Smetana, no Graphviz needed)
-- `CLAUDE.md` — operating instructions for the agent
+- `AGENTS.md` — operating instructions for the agent
 
 ## Prerequisites
 

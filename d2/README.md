@@ -10,7 +10,7 @@ D2 sibling of `../plantuml/` — same board, same stickies, same stable IDs
   build with `./render.sh`, see published copy in `../.generated/`
   or download from CI), do not hand-edit
 - `render.sh` — renders both (layout TALA, override with `D2_LAYOUT=dagre`)
-- `CLAUDE.md` — operating instructions for the agent
+- `AGENTS.md` — operating instructions for the agent
 
 ## Prerequisites
 

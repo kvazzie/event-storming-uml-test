@@ -11,7 +11,7 @@ difference with an agent like Claude Code.
   `plantuml.jar`; Smetana layout, no Graphviz). See its README.
 - `d2/` — `event-storming.d2` + `render.sh` (needs the `d2` binary;
   TALA layout, convention grid). See its README.
-- Each folder has its own `CLAUDE.md` (agent operating rules) and
+- Each folder has its own `AGENTS.md` (agent operating rules) and
   renders its own SVG/PNG. Stable IDs (`E02_OrderPlaced`, …) match
   across both, so prompts and reviews transfer 1:1.
 

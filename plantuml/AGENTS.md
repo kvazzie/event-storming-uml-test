@@ -1,4 +1,4 @@
-# CLAUDE.md — Event-Storming Board Operator
+# AGENTS.md — Event-Storming Board Operator
 
 Source of truth: `event-storming.puml`. Never hand-edit PNG/SVG.
 
